@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetCurrentTempo(c *fiber.Ctx) error {
+func (h *Handler) GetCurrentTempo(c *fiber.Ctx) error {
 	t := time.Now().Format("2006-01-02")
 
 	url := fmt.Sprintf("https://particulier.edf.fr/bin/edf_rc/servlets/ejptemponew?Date_a_remonter=%s&TypeAlerte=TEMPO", t)
