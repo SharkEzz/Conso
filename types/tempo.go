@@ -1,12 +1,12 @@
 package types
 
-type TempoRawResponseItem struct {
+type tempoRawResponseItem struct {
 	Tempo string
 }
 
 type TempoRawResponse struct {
-	JourJ1 TempoRawResponseItem
-	JourJ  TempoRawResponseItem
+	JourJ1 tempoRawResponseItem
+	JourJ  tempoRawResponseItem
 }
 
 type TempoResponse struct {

@@ -7,5 +7,6 @@ import (
 )
 
 func LogConsumption(db *gorm.DB) {
+	// TODO
 	fmt.Println("logging")
 }

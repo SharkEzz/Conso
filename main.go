@@ -14,12 +14,13 @@ import (
 
 var (
 	logTimer = flag.Uint64("logTimer", 60, "The delay between 2 consumption logs in seconds")
+	migrate  = flag.Bool("migrate", false, "Set to true to enable models migrations")
 )
 
 func main() {
 	flag.Parse()
 
-	db, err := database.InitDb()
+	db, err := database.InitDb(*migrate)
 	if err != nil {
 		panic(err)
 	}
@@ -36,6 +37,7 @@ func registerRoutes(app *fiber.App, db *gorm.DB) {
 	baseHandler := handlers.NewHandler(db)
 
 	app.Get("/tempo", baseHandler.GetCurrentTempo)
+	app.Get("/stats", baseHandler.GetStatsWithFilters)
 	app.Get("/stats/today", baseHandler.GetTodayStats)
 }
 

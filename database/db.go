@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDb() (*gorm.DB, error) {
+func InitDb(migrate bool) (*gorm.DB, error) {
 	// TODO: environment variables
 	dsn := "host=localhost user=elec password=elec dbname=elec port=5432 TimeZone=Europe/Paris"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -14,7 +14,9 @@ func InitDb() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&models.Consumption{})
+	if migrate {
+		db.AutoMigrate(&models.Consumption{})
+	}
 
 	return db, nil
 }
