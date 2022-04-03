@@ -7,6 +7,7 @@ import (
 
 	"github.com/SharkEzz/elec/database/models"
 	"github.com/SharkEzz/elec/types"
+	"github.com/SharkEzz/elec/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,7 +27,9 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 		TotalAverage: total,
 	}
 
-	return c.JSON(responsePayload)
+	response := utils.GenerateResponse(200, "", responsePayload)
+
+	return c.JSON(response)
 }
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
@@ -66,12 +69,14 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		TotalAverage: total,
 	}
 
-	return c.JSON(responsePayload)
+	response := utils.GenerateResponse(200, "", responsePayload)
+
+	return c.JSON(response)
 }
 
 func computeTotal(consumptions *[]models.Consumption) float64 {
 	if len(*consumptions) == 0 {
-		return 0
+		return 0.
 	}
 
 	var total float64

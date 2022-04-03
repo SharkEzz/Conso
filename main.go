@@ -37,6 +37,7 @@ func registerRoutes(app *fiber.App, db *gorm.DB) {
 	baseHandler := handlers.NewHandler(db)
 
 	app.Get("/tempo", baseHandler.GetCurrentTempo)
+	app.Get("/prices", baseHandler.GetPrices)
 	app.Get("/stats", baseHandler.GetStatsWithFilters)
 	app.Get("/stats/today", baseHandler.GetTodayStats)
 }
