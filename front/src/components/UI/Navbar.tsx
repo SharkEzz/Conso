@@ -1,5 +1,6 @@
 import { Box, Container, Flex, Text } from '@chakra-ui/react';
-import Tempo from '../tempo';
+import { Link } from 'react-router-dom';
+import Tempo from '../Tempo';
 
 export default function Navbar() {
   return (
@@ -10,9 +11,9 @@ export default function Navbar() {
             Suivi conso
           </Text>
           <Flex gap={3}>
-            <span>Journée</span>
-            <span>Historique</span>
-            <span>Statistiques</span>
+            <Link to="/">Journée</Link>
+            <Link to="/historique">Historique</Link>
+            <Link to="/statistiques">Statistiques</Link>
           </Flex>
           <Box ml="auto">
             <Tempo />

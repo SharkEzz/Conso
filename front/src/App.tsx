@@ -1,8 +1,9 @@
-import { Box, Container } from '@chakra-ui/react';
+import { Container } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import FiltersDrawer from './components/UI/FiltersDrawer';
+import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/UI/Navbar';
-import TotalDay from './components/UI/TotalDay';
+import Index from './pages';
+import Stats from './pages/historyPage';
 import configureAxios from './utils/configureAxios';
 
 configureAxios();
@@ -13,10 +14,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Navbar />
       <Container maxW="container.xl">
-        <Box textAlign="right" mb={6}>
-          <FiltersDrawer />
-        </Box>
-        <TotalDay />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/historique" element={<Stats />} />
+        </Routes>
       </Container>
     </QueryClientProvider>
   );

@@ -1,8 +1,8 @@
-import { Badge, Flex, Spinner, Text } from '@chakra-ui/react';
+import { Badge, Flex, Spinner, Text, ThemeTypings } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import fetchTempo from '../../actions/fetchTempo';
 
-function tempoToString(tempoStr: string | undefined): string {
+function tempoToString(tempoStr: string): string {
   switch (tempoStr) {
     case 'TEMPO_BLEU':
       return 'Bleu';
@@ -11,7 +11,20 @@ function tempoToString(tempoStr: string | undefined): string {
     case 'TEMPO_ROUGE':
       return 'Rouge';
     default:
-      return '';
+      return 'Erreur';
+  }
+}
+
+function getTempoColor(tempoStr: string): ThemeTypings['colorSchemes'] {
+  switch (tempoStr) {
+    case 'TEMPO_BLEU':
+      return 'blue';
+    case 'TEMPO_BLANC':
+      return 'gray';
+    case 'TEMPO_ROUGE':
+      return 'red';
+    default:
+      return 'red';
   }
 }
 
@@ -19,16 +32,16 @@ function getTempo(
   isLoading: boolean,
   tempo: string | undefined,
 ): JSX.Element | null {
-  if (!isLoading && !tempo) {
-    return <Badge colorScheme="red">Une erreur est survenue</Badge>;
-  }
-
   if (isLoading) {
     return <Spinner size="sm" />;
   }
 
+  if ((!isLoading && !tempo) || !tempo) {
+    return <Badge colorScheme="red">Erreur</Badge>;
+  }
+
   return (
-    <Badge variant="solid" colorScheme="blue">
+    <Badge variant="solid" colorScheme={getTempoColor(tempo)}>
       {tempoToString(tempo)}
     </Badge>
   );
@@ -40,7 +53,7 @@ export default function Tempo() {
   return (
     <Flex gap={6}>
       <Text as="span">Tempo J : {getTempo(isLoading, data?.Today)}</Text>
-      <Text as="span">Tempo J + 1 : {getTempo(isLoading, data?.Tomorrow)}</Text>
+      <Text as="span">Tempo J+1 : {getTempo(isLoading, data?.Tomorrow)}</Text>
     </Flex>
   );
 }

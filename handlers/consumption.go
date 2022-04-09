@@ -24,6 +24,7 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 	responsePayload := types.ConsumptionsResponse{
 		Consumptions: consumptions,
 		TotalAverage: total,
+		TodayDate:    time.Now().Format("2006-01-02") + " 06:00:00",
 	}
 
 	return c.JSON(utils.GenerateResponse(200, "", responsePayload))

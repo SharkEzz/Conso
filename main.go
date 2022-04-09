@@ -4,6 +4,7 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/SharkEzz/elec/database"
@@ -11,12 +12,14 @@ import (
 	"github.com/SharkEzz/elec/services"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"gorm.io/gorm"
 )
 
 var (
-	logTimer = flag.Uint64("logTimer", 60, "The delay between 2 consumption logs in seconds")
-	migrate  = flag.Bool("migrate", false, "Set to true to enable models migrations")
+	logTimer      = flag.Uint64("logTimer", 60, "The delay between 2 consumption logs in seconds")
+	migrate       = flag.Bool("migrate", false, "Set to true to enable models migrations")
+	disableLogger = flag.Bool("disableLogger", false, "Set to true to disable the periodic logger")
 )
 
 //go:embed front/dist/*
@@ -33,7 +36,14 @@ func main() {
 	app := fiber.New()
 
 	registerRoutes(app, db)
-	registerLogger(db)
+	if !*disableLogger {
+		registerLogger(db)
+	}
+
+	app.Use(filesystem.New(filesystem.Config{
+		Root:       http.FS(content),
+		PathPrefix: "front/dist",
+	}))
 
 	app.Listen(":8080")
 }
@@ -43,7 +53,6 @@ func registerRoutes(app *fiber.App, db *gorm.DB) {
 
 	apiGroup := app.Group("/api")
 
-	// TODO: remove
 	apiGroup.Use(cors.New())
 
 	apiGroup.Get("/tempo", baseHandler.GetCurrentTempo)
