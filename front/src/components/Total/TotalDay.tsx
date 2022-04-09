@@ -122,7 +122,7 @@ export default function TotalDay({
             }}
           />
         </Box>
-        <Pricing hourlyConsumptions={hourlyConsumptions} />
+        <Pricing hourlyConsumptions={hourlyConsumptions} pricings={pricings} />
       </Box>
       <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
         <Text>

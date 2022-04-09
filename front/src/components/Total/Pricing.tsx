@@ -6,23 +6,22 @@ import {
   ListItem,
   Badge,
 } from '@chakra-ui/react';
-import { useContext } from 'react';
-import PricingContext from '../../context/princingContext';
+import { Pricings } from '../../actions/fetchPricing';
 import computeCost from '../../utils/computeConst';
 
 export default function Pricing({
   hourlyConsumptions,
+  pricings,
 }: {
   hourlyConsumptions: Record<number, number>;
+  pricings: Pricings;
 }) {
-  const pricings = useContext(PricingContext);
-
   return (
     <Box>
       <Text mb={1} fontSize="xl" fontWeight="semibold">
         Coût
       </Text>
-      <SimpleGrid columns={3} spacing={6}>
+      <SimpleGrid columns={[1, 2, 3]} spacing={6}>
         <Box>
           <Text fontSize="lg" mb={1}>
             Jour rouge
