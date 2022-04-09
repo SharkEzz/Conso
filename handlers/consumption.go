@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/SharkEzz/elec/database/models"
@@ -27,16 +26,15 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 		TotalAverage: total,
 	}
 
-	response := utils.GenerateResponse(200, "", responsePayload)
-
-	return c.JSON(response)
+	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
 }
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 	filters := c.Query("filters", "")
 
 	if filters == "" {
-		return fmt.Errorf("Invalid filters")
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(utils.GenerateResponse(fiber.StatusBadRequest, "Invalid filters", ""))
 	}
 
 	var filtersJson map[string]string
@@ -69,9 +67,7 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		TotalAverage: total,
 	}
 
-	response := utils.GenerateResponse(200, "", responsePayload)
-
-	return c.JSON(response)
+	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
 }
 
 func computeTotal(consumptions *[]models.Consumption) float64 {

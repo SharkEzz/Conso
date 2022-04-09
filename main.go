@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/SharkEzz/elec/handlers"
 	"github.com/SharkEzz/elec/services"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +18,9 @@ var (
 	logTimer = flag.Uint64("logTimer", 60, "The delay between 2 consumption logs in seconds")
 	migrate  = flag.Bool("migrate", false, "Set to true to enable models migrations")
 )
+
+//go:embed front/dist/*
+var content embed.FS
 
 func main() {
 	flag.Parse()
@@ -36,10 +41,15 @@ func main() {
 func registerRoutes(app *fiber.App, db *gorm.DB) {
 	baseHandler := handlers.NewHandler(db)
 
-	app.Get("/tempo", baseHandler.GetCurrentTempo)
-	app.Get("/prices", baseHandler.GetPrices)
-	app.Get("/stats", baseHandler.GetStatsWithFilters)
-	app.Get("/stats/today", baseHandler.GetTodayStats)
+	apiGroup := app.Group("/api")
+
+	// TODO: remove
+	apiGroup.Use(cors.New())
+
+	apiGroup.Get("/tempo", baseHandler.GetCurrentTempo)
+	apiGroup.Get("/prices", baseHandler.GetPrices)
+	apiGroup.Get("/stats", baseHandler.GetStatsWithFilters)
+	apiGroup.Get("/stats/today", baseHandler.GetTodayStats)
 }
 
 func registerLogger(db *gorm.DB) {

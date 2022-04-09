@@ -44,6 +44,7 @@ func (h *Handler) GetCurrentTempo(c *fiber.Ctx) error {
 
 	response := utils.GenerateResponse(http.StatusOK, "", processTempoRawResponse(&tempoRawResponse))
 
+	//c.Set("Access-Control-Allow-Origin", "*")
 	return c.JSON(response)
 }
 
