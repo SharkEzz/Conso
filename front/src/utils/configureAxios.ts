@@ -1,5 +1,6 @@
 import axios from 'axios';
 
 export default function configureAxios() {
-  axios.defaults.baseURL = '/api';
+  axios.defaults.baseURL = 'http://localhost:8080/api';
+  // axios.defaults.baseURL = '/api';
 }

@@ -119,7 +119,7 @@ export default function TotalDay({
           Moyenne consommation : <Badge colorScheme="linkedin">{average}</Badge>
         </Text>
         <Text>
-          Moyenne consommation : <Badge colorScheme="linkedin">xxx €</Badge>
+          Coût total journée : <Badge colorScheme="linkedin">xxx €</Badge>
         </Text>
       </Flex>
     </Box>

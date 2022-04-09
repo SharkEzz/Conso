@@ -6,8 +6,12 @@ import {
   ListItem,
   Badge,
 } from '@chakra-ui/react';
+import { useContext } from 'react';
+import PricingContext from '../../context/princingContext';
 
 export default function Pricing() {
+  const pricings = useContext(PricingContext);
+
   return (
     <Box>
       <Text mb={1} fontSize="xl" fontWeight="semibold">
@@ -20,10 +24,10 @@ export default function Pricing() {
           </Text>
           <UnorderedList>
             <ListItem>
-              Heure pleine : <Badge>0.15cts</Badge>
+              Heure pleine : <Badge>{pricings.Red.FullHour} cts</Badge>
             </ListItem>
             <ListItem>
-              Heure creuse : <Badge>0.15cts</Badge>
+              Heure creuse : <Badge>{pricings.Red.PeakHour} cts</Badge>
             </ListItem>
           </UnorderedList>
           <Text mt={3}>Total : xxx €</Text>
@@ -34,10 +38,10 @@ export default function Pricing() {
           </Text>
           <UnorderedList>
             <ListItem>
-              Heure pleine : <Badge>0.15cts</Badge>
+              Heure pleine : <Badge>{pricings.White.FullHour} cts</Badge>
             </ListItem>
             <ListItem>
-              Heure creuse : <Badge>0.15cts</Badge>
+              Heure creuse : <Badge>{pricings.White.PeakHour} cts</Badge>
             </ListItem>
           </UnorderedList>
           <Text mt={3}>Total : xxx €</Text>
@@ -48,10 +52,10 @@ export default function Pricing() {
           </Text>
           <UnorderedList>
             <ListItem>
-              Heure pleine : <Badge>0.15cts</Badge>
+              Heure pleine : <Badge>{pricings.Blue.FullHour} cts</Badge>
             </ListItem>
             <ListItem>
-              Heure creuse : <Badge>0.15cts</Badge>
+              Heure creuse : <Badge>{pricings.Blue.PeakHour} cts</Badge>
             </ListItem>
           </UnorderedList>
           <Text mt={3}>Total : xxx €</Text>
