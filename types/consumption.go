@@ -5,7 +5,8 @@ import (
 )
 
 type ConsumptionsResponse struct {
-	Consumptions []models.Consumption
-	TotalAverage float64
-	TodayDate    string
+	Consumptions     []models.Consumption
+	HourConsumptions map[int]float64
+	TotalAverage     float64
+	TodayDate        string
 }

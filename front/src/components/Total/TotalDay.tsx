@@ -61,12 +61,14 @@ function computeData(
 
 type TotalDayProps = {
   consumptions: Consumption[];
+  hourlyConsumptions: Record<number, number>;
   average: number;
   date: string;
 };
 
 export default function TotalDay({
   consumptions,
+  hourlyConsumptions,
   average,
   date,
 }: TotalDayProps) {
@@ -112,14 +114,12 @@ export default function TotalDay({
             }}
           />
         </Box>
-        <Pricing />
+        <Pricing hourlyConsumptions={hourlyConsumptions} />
       </Box>
       <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
         <Text>
-          Moyenne consommation : <Badge colorScheme="linkedin">{average}</Badge>
-        </Text>
-        <Text>
-          Coût total journée : <Badge colorScheme="linkedin">xxx €</Badge>
+          Moyenne consommation :{' '}
+          <Badge colorScheme="linkedin">{average} W/h</Badge>
         </Text>
       </Flex>
     </Box>

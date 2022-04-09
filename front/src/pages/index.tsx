@@ -16,6 +16,7 @@ export default function Index() {
   return (
     <TotalDay
       consumptions={data.Consumptions}
+      hourlyConsumptions={data.HourConsumptions}
       average={data.TotalAverage}
       date={data.TodayDate}
     />

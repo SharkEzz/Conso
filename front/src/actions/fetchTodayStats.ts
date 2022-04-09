@@ -14,6 +14,7 @@ export type Consumption = {
 
 export type TodayStatsResponse = {
   Consumptions: Array<Consumption>;
+  HourConsumptions: Record<number, number>;
   TotalAverage: number;
   TodayDate: string;
 };
