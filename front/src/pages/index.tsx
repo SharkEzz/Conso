@@ -1,3 +1,4 @@
+import { Spinner } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import fetchTodayStats from '../actions/fetchTodayStats';
 import TotalDay from '../components/Total/TotalDay';
@@ -10,15 +11,8 @@ export default function Index() {
   }
 
   if (isLoading) {
-    return null;
+    return <Spinner />;
   }
 
-  return (
-    <TotalDay
-      consumptions={data.Consumptions}
-      hourlyConsumptions={data.HourConsumptions}
-      average={data.TotalAverage}
-      date={data.TodayDate}
-    />
-  );
+  return <TotalDay stats={data} />;
 }

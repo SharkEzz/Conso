@@ -58,13 +58,15 @@ func LogConsumption(db *gorm.DB) {
 	voltage := 0.
 	power := 0.
 
-	lastDay := time.Now().AddDate(0, 0, -1).Format("2006-01-02") + " 06:00:00"
 	currentDay := time.Now().Format("2006-01-02") + " 06:00:00"
+	limitDay := time.Now().AddDate(0, 0, 1).Format("2006-01-02") + " 06:00:00"
+
+	var count int64
 
 	var day *models.Day
-	db.Where("created_at >= ? AND created_at < ?", lastDay, currentDay).Find(&day)
+	db.Where("created_at >= ? AND created_at < ?", currentDay, limitDay).Find(&day).Count(&count)
 
-	if day == nil {
+	if count == 0 {
 		// TODO: handle error
 		dayTempo, _ := utils.GetTempo()
 
@@ -88,8 +90,8 @@ func LogConsumption(db *gorm.DB) {
 			FullHourPrice: fullHourPrice,
 			PeakHourPrice: peakHourPrice,
 		}
-		// TODO: fixme
-		db.Create(day)
+
+		db.Create(&day)
 	}
 
 	wg := sync.WaitGroup{}

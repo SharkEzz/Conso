@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"sync"
 	"time"
 
 	"github.com/SharkEzz/elec/database/models"
@@ -10,21 +11,36 @@ import (
 )
 
 func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
-	var consumptions []models.ConsumptionLog
+	var day models.Day
 
-	b.db.Where(
-		"created_at >= ?",
-		time.Now().Format("2006-01-02")+" 06:00:00",
-	).Find(&consumptions)
+	// TODO: check better way to query relationships?
+	b.db.Preload("ConsumptionLogs").Last(&day)
 
-	total := computeTotal(&consumptions)
-	perHour := computePerHour(&consumptions)
+	var total float64
+	var totalPerHour map[int]float64
 
-	responsePayload := types.ConsumptionsResponse{
-		Consumptions:     consumptions,
-		HourConsumptions: perHour,
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		total = computeTotal(&day.ConsumptionLogs)
+		wg.Done()
+	}()
+	go func() {
+		totalPerHour = computePerHour(&day.ConsumptionLogs)
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	responsePayload := types.DailyConsumptionsResponse{
+		Consumptions:     day.ConsumptionLogs,
+		HourConsumptions: totalPerHour,
 		TotalAverage:     total,
-		TodayDate:        time.Now().Format("2006-01-02") + " 06:00:00",
+		TodayDate:        day.CreatedAt.Format("2006-01-02") + " 06:00:00",
+		Tempo:            day.Tempo,
+		FullHourPrice:    day.FullHourPrice,
+		PeakHourPrice:    day.PeakHourPrice,
 	}
 
 	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
@@ -32,7 +48,7 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 
-	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().AddDate(0, -1, 0).Format(time.RFC3339)))
+	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().AddDate(0, 0, -1).Format(time.RFC3339)))
 	if err != nil {
 		return err
 	}
@@ -41,25 +57,43 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		return err
 	}
 
-	var consumptions []models.ConsumptionLog
+	var days []models.Day
 
-	b.db.Where(
-		"created_at BETWEEN ? AND ?",
-		from,
-		to,
-	).Find(&consumptions)
+	// TODO: check better way to query relationships?
+	b.db.Preload("ConsumptionLogs").Where("created_at >= ? AND created_at <= ?", from.Format("2006-01-02")+" 06:00:00", to.AddDate(0, 0, 1).Format("2006-01-02")+" 06:00:00").Find(&days)
 
-	total := computeTotal(&consumptions)
-	perHour := computePerHour(&consumptions)
+	consumptions := map[string]types.DailyConsumptionsResponse{}
 
-	responsePayload := types.ConsumptionsResponse{
-		Consumptions:     consumptions,
-		TodayDate:        time.Now().Format("2006-01-02") + " 06:00:00",
-		HourConsumptions: perHour,
-		TotalAverage:     total,
+	for _, day := range days {
+		var total float64
+		var totalPerHour map[int]float64
+
+		wg := sync.WaitGroup{}
+		wg.Add(2)
+
+		go func() {
+			total = computeTotal(&day.ConsumptionLogs)
+			wg.Done()
+		}()
+		go func() {
+			totalPerHour = computePerHour(&day.ConsumptionLogs)
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		consumptions[day.CreatedAt.Format("2006-01-02")] = types.DailyConsumptionsResponse{
+			Consumptions:     day.ConsumptionLogs,
+			HourConsumptions: totalPerHour,
+			TotalAverage:     total,
+			TodayDate:        day.CreatedAt.Format("2006-01-02") + " 06:00:00",
+			Tempo:            day.Tempo,
+			FullHourPrice:    day.FullHourPrice,
+			PeakHourPrice:    day.PeakHourPrice,
+		}
 	}
 
-	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
+	return c.JSON(utils.GenerateResponse(200, "", consumptions))
 }
 
 func computePerHour(consumptions *[]models.ConsumptionLog) map[int]float64 {

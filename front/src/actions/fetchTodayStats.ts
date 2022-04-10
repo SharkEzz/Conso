@@ -17,6 +17,9 @@ export type StatsResponse = {
   HourConsumptions: Record<number, number>;
   TotalAverage: number;
   TodayDate: string;
+  Tempo: string;
+  FullHourPrice: string;
+  PeakHourPrice: string;
 };
 
 export default async function fetchTodayStats() {

@@ -11,7 +11,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { Badge, Box, Flex, Text } from '@chakra-ui/react';
 import { useContext } from 'react';
-import { Consumption } from '../../actions/fetchTodayStats';
+import { Consumption, StatsResponse } from '../../actions/fetchTodayStats';
 import Pricing from './Pricing';
 import PricingContext from '../../context/princingContext';
 import computeCost from '../../utils/computeCost';
@@ -62,26 +62,14 @@ function computeData(
   return data;
 }
 
-type TotalDayProps = {
-  consumptions: Consumption[];
-  hourlyConsumptions: Record<number, number>;
-  average: number;
-  date: string;
-};
-
-export default function TotalDay({
-  consumptions,
-  hourlyConsumptions,
-  average,
-  date,
-}: TotalDayProps) {
+export default function TotalDay({ stats }: { stats: StatsResponse }) {
   const pricings = useContext(PricingContext);
 
   return (
-    <Box borderWidth="thin" borderRadius="lg" boxShadow="md">
+    <Box borderWidth="thin" borderRadius="lg" boxShadow="md" mb={6}>
       <Box py={3} px={6} borderBottomWidth="thin">
         <Text>
-          {new Date(date).toLocaleDateString('fr-FR', {
+          {new Date(stats.TodayDate).toLocaleDateString('fr-FR', {
             dateStyle: 'full',
           })}
         </Text>
@@ -114,24 +102,27 @@ export default function TotalDay({
               },
             }}
             data={{
-              labels: computeLabels(consumptions),
-              datasets: computeData(consumptions),
+              labels: computeLabels(stats.Consumptions),
+              datasets: computeData(stats.Consumptions),
             }}
           />
         </Box>
-        <Pricing hourlyConsumptions={hourlyConsumptions} pricings={pricings} />
+        <Pricing
+          hourlyConsumptions={stats.HourConsumptions}
+          pricings={pricings}
+        />
       </Box>
       <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
         <Text>
           Moyenne consommation :{' '}
           <Badge colorScheme="linkedin">
-            {Math.round(average * 1000) / 1000} W/h
+            {Math.round(stats.TotalAverage * 1000) / 1000} W/h
           </Badge>
         </Text>
         <Text>
           Coût moyen :{' '}
           <Badge colorScheme="linkedin">
-            {computeCost('TEMPO_BLEU', hourlyConsumptions, pricings)} €
+            {computeCost(stats.Tempo, stats.HourConsumptions, pricings)} €
           </Badge>
         </Text>
       </Flex>
