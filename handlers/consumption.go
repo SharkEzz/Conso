@@ -18,6 +18,11 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 	// TODO: check better way to query relationships?
 	b.db.Preload("ConsumptionLogs").Order("created_at DESC").Last(&day)
 
+	// TODO: handle error when no data are logged
+	if day.ConsumptionLogs == nil {
+		day.ConsumptionLogs = []models.ConsumptionLog{}
+	}
+
 	var total float64
 	var totalPerHour map[int]float64
 
@@ -76,6 +81,10 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 	for _, day := range days {
 		var total float64
 		var totalPerHour map[int]float64
+
+		if day.ConsumptionLogs == nil {
+			day.ConsumptionLogs = []models.ConsumptionLog{}
+		}
 
 		wg := sync.WaitGroup{}
 		wg.Add(2)
