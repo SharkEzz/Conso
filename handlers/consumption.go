@@ -47,7 +47,7 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		"created_at BETWEEN ? AND ?",
 		from,
 		to,
-	).Group("date(created_at)").Find(&consumptions)
+	).Find(&consumptions)
 
 	total := computeTotal(&consumptions)
 	perHour := computePerHour(&consumptions)
