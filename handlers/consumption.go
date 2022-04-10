@@ -14,7 +14,7 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 	var day models.Day
 
 	// TODO: check better way to query relationships?
-	b.db.Preload("ConsumptionLogs").Last(&day)
+	b.db.Preload("ConsumptionLogs").Order("created_at DESC").Last(&day)
 
 	var total float64
 	var totalPerHour map[int]float64
@@ -48,7 +48,7 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 
-	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().AddDate(0, 0, -1).Format(time.RFC3339)))
+	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().Format(time.RFC3339)))
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,13 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 	var days []models.Day
 
 	// TODO: check better way to query relationships?
-	b.db.Preload("ConsumptionLogs").Where("created_at >= ? AND created_at <= ?", from.Format("2006-01-02")+" 06:00:00", to.AddDate(0, 0, 1).Format("2006-01-02")+" 06:00:00").Find(&days)
+	b.db.
+		Preload("ConsumptionLogs").
+		Where(
+			"created_at >= ? AND created_at <= ?",
+			from.Format("2006-01-02")+" 06:00:00",
+			to.AddDate(0, 0, 1).Format("2006-01-02")+" 06:00:00",
+		).Find(&days)
 
 	consumptions := map[string]types.DailyConsumptionsResponse{}
 

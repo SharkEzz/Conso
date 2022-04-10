@@ -59,11 +59,14 @@ export default function FiltersDrawer({
 
           <DrawerFooter>
             <Button variant="outline" mr={3} onClick={onClose}>
-              Annuler
+              Fermer
             </Button>
             <Button
               colorScheme="blue"
-              onClick={() => handleValid(startDate, stopDate)}
+              onClick={() => {
+                handleValid(startDate, stopDate);
+                onClose();
+              }}
             >
               Valider
             </Button>
