@@ -1,7 +1,7 @@
 import { Spinner } from '@chakra-ui/react';
 import { useQuery } from 'react-query';
 import fetchTodayStats from '../actions/fetchTodayStats';
-import TotalDay from '../components/Total/TotalDay';
+import TotalDay from '../components/TotalDay/TotalDay';
 
 export default function Index() {
   const { data, isLoading, isError } = useQuery('todayStats', fetchTodayStats);

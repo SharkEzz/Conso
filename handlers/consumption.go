@@ -104,6 +104,11 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 
 func computePerHour(consumptions *[]models.ConsumptionLog) map[int]float64 {
 	data := map[int]float64{}
+
+	if len(*consumptions) == 0 {
+		return data
+	}
+
 	count := map[int]int{}
 
 	for _, item := range *consumptions {

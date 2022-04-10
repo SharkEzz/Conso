@@ -67,8 +67,10 @@ func LogConsumption(db *gorm.DB) {
 	db.Where("created_at >= ? AND created_at < ?", currentDay, limitDay).Find(&day).Count(&count)
 
 	if count == 0 {
-		// TODO: handle error
-		dayTempo, _ := utils.GetTempo()
+		dayTempo, err := utils.GetTempo()
+		if err != nil {
+			return
+		}
 
 		var fullHourPrice float64
 		var peakHourPrice float64
