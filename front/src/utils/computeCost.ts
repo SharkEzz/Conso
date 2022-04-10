@@ -36,5 +36,5 @@ export default function computeCost(
     }
   });
 
-  return Math.round((cost + Number.EPSILON) * 10000) / 10000;
+  return Math.round((cost + Number.EPSILON) * 100000) / 100000;
 }

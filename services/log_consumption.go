@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/SharkEzz/elec/constants"
 	"github.com/SharkEzz/elec/database/models"
@@ -56,7 +57,40 @@ func getPower() float64 {
 func LogConsumption(db *gorm.DB) {
 	voltage := 0.
 	power := 0.
-	var dayColor string
+
+	lastDay := time.Now().AddDate(0, 0, -1).Format("2006-01-02") + " 06:00:00"
+	currentDay := time.Now().Format("2006-01-02") + " 06:00:00"
+
+	var day *models.Day
+	db.Where("created_at >= ? AND created_at < ?", lastDay, currentDay).Find(&day)
+
+	if day == nil {
+		// TODO: handle error
+		dayTempo, _ := utils.GetTempo()
+
+		var fullHourPrice float64
+		var peakHourPrice float64
+
+		switch dayTempo.Today {
+		case "TEMPO_ROUGE":
+			fullHourPrice = constants.RedFullHourPrice
+			peakHourPrice = constants.RedPeakHourPrice
+		case "TEMPO_BLANC":
+			fullHourPrice = constants.WhiteFullHourPrice
+			peakHourPrice = constants.WhitePeakHourPrice
+		case "TEMPO_BLEU":
+			fullHourPrice = constants.BlueFullHourPrice
+			peakHourPrice = constants.BluePeakHourPrice
+		}
+
+		day = &models.Day{
+			Tempo:         dayTempo.Today,
+			FullHourPrice: fullHourPrice,
+			PeakHourPrice: peakHourPrice,
+		}
+		// TODO: fixme
+		db.Create(day)
+	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
@@ -69,38 +103,14 @@ func LogConsumption(db *gorm.DB) {
 		power = getPower()
 		wg.Done()
 	}()
-	go func() {
-		tempo, err := utils.GetTempo()
-		if err != nil {
-			dayColor = ""
-		}
-		dayColor = tempo.Today
-	}()
 
 	wg.Wait()
 
-	var fullHourPrice float64
-	var peakHourPrice float64
-
-	switch dayColor {
-	case "TEMPO_ROUGE":
-		fullHourPrice = constants.RedFullHourPrice
-		peakHourPrice = constants.RedPeakHourPrice
-	case "TEMPO_BLANC":
-		fullHourPrice = constants.WhiteFullHourPrice
-		peakHourPrice = constants.WhitePeakHourPrice
-	case "TEMPO_BLEU":
-		fullHourPrice = constants.BlueFullHourPrice
-		peakHourPrice = constants.BluePeakHourPrice
-	}
-
-	consumption := models.Consumption{
-		DayColor:       dayColor,
-		FullHourPrice:  fullHourPrice,
-		PeakHoursPrice: peakHourPrice,
-		Temperature:    0,
-		Power:          power,
-		Voltage:        voltage,
+	consumption := models.ConsumptionLog{
+		Temperature: 0,
+		Power:       power,
+		Voltage:     voltage,
+		DayID:       day.ID,
 	}
 
 	db.Save(&consumption)

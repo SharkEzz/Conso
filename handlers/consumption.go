@@ -10,7 +10,7 @@ import (
 )
 
 func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
-	var consumptions []models.Consumption
+	var consumptions []models.ConsumptionLog
 
 	b.db.Where(
 		"created_at >= ?",
@@ -41,7 +41,7 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		return err
 	}
 
-	var consumptions []models.Consumption
+	var consumptions []models.ConsumptionLog
 
 	b.db.Where(
 		"created_at BETWEEN ? AND ?",
@@ -62,7 +62,7 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
 }
 
-func computePerHour(consumptions *[]models.Consumption) map[int]float64 {
+func computePerHour(consumptions *[]models.ConsumptionLog) map[int]float64 {
 	data := map[int]float64{}
 	count := map[int]int{}
 
@@ -79,7 +79,7 @@ func computePerHour(consumptions *[]models.Consumption) map[int]float64 {
 	return data
 }
 
-func computeTotal(consumptions *[]models.Consumption) float64 {
+func computeTotal(consumptions *[]models.ConsumptionLog) float64 {
 	if len(*consumptions) == 0 {
 		return 0.
 	}

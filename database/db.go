@@ -13,7 +13,8 @@ func InitDb(migrate bool) (*gorm.DB, error) {
 	}
 
 	if migrate {
-		db.AutoMigrate(&models.Consumption{})
+		db.AutoMigrate(&models.Day{})
+		db.AutoMigrate(&models.ConsumptionLog{})
 	}
 
 	return db, nil

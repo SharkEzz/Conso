@@ -124,17 +124,14 @@ export default function TotalDay({
       <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
         <Text>
           Moyenne consommation :{' '}
-          <Badge colorScheme="linkedin">{average} W/h</Badge>
+          <Badge colorScheme="linkedin">
+            {Math.round(average * 1000) / 1000} W/h
+          </Badge>
         </Text>
         <Text>
           Coût moyen :{' '}
           <Badge colorScheme="linkedin">
-            {computeCost(
-              consumptions?.[0]?.DayColor,
-              hourlyConsumptions,
-              pricings,
-            )}{' '}
-            €
+            {computeCost('TEMPO_BLEU', hourlyConsumptions, pricings)} €
           </Badge>
         </Text>
       </Flex>
