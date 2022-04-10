@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SharkEzz/elec/types"
+	log "github.com/sirupsen/logrus"
 )
 
 func processTempoRawResponse(tempoRes types.TempoRawResponse) types.TempoResponse {
@@ -27,6 +28,7 @@ func GetTempo() (*types.TempoResponse, error) {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
+		log.Info("error while creating GetTempo request", err)
 		return nil, err
 	}
 
@@ -35,11 +37,13 @@ func GetTempo() (*types.TempoResponse, error) {
 	client := http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
+		log.Info("error while querying tempo API", err)
 		return nil, err
 	}
 
 	content, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		log.Info("error while reading tempo api response", err)
 		return nil, err
 	}
 
@@ -47,6 +51,7 @@ func GetTempo() (*types.TempoResponse, error) {
 
 	err = json.Unmarshal(content, &tempoRawResponse)
 	if err != nil {
+		log.Info("error while unmarshaling tempo json", err)
 		return nil, err
 	}
 

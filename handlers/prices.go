@@ -22,7 +22,5 @@ func (b *Handler) GetPrices(c *fiber.Ctx) error {
 		},
 	}
 
-	response := utils.GenerateResponse(200, "", prices)
-
-	return c.JSON(response)
+	return c.JSON(utils.GenerateResponse(200, "", prices))
 }

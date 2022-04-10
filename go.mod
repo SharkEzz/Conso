@@ -4,6 +4,8 @@ go 1.18
 
 require github.com/gofiber/fiber/v2 v2.31.0
 
+require github.com/sirupsen/logrus v1.8.1 // indirect
+
 require (
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	gorm.io/driver/sqlite v1.3.1

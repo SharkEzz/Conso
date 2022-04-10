@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -12,6 +11,8 @@ import (
 	"github.com/SharkEzz/elec/database/models"
 	"github.com/SharkEzz/elec/utils"
 	"gorm.io/gorm"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const url = "http://192.168.0.11/sensor/"
@@ -19,16 +20,19 @@ const url = "http://192.168.0.11/sensor/"
 func getVoltage() float64 {
 	voltageData, err := http.Get(url + "pzem-004t_v3_voltage")
 	if err != nil {
+		log.Error("invalid voltage response", err)
 		return -1
 	}
 
 	body, err := ioutil.ReadAll(voltageData.Body)
 	if err != nil {
+		log.Error("error while reading voltage response body", err)
 		return -1
 	}
 	var bodyMap map[string]any
 	err = json.Unmarshal(body, &bodyMap)
 	if err != nil {
+		log.Error("error while unmarshaling voltage json", err)
 		return -1
 	}
 
@@ -38,16 +42,19 @@ func getVoltage() float64 {
 func getPower() float64 {
 	powerData, err := http.Get(url + "pzem-004t_v3_power")
 	if err != nil {
+		log.Error("invalid power response", err)
 		return -1
 	}
 
 	body, err := ioutil.ReadAll(powerData.Body)
 	if err != nil {
+		log.Error("error while reading power response body", err)
 		return -1
 	}
 	var bodyMap map[string]any
 	err = json.Unmarshal(body, &bodyMap)
 	if err != nil {
+		log.Error("error while unmarshaling power json", err)
 		return -1
 	}
 
@@ -67,6 +74,7 @@ func LogConsumption(db *gorm.DB) {
 	db.Where("created_at >= ? AND created_at < ?", currentDay, limitDay).Find(&day).Count(&count)
 
 	if count == 0 {
+		log.Info("creating new day")
 		dayTempo, err := utils.GetTempo()
 		if err != nil {
 			return
@@ -119,5 +127,5 @@ func LogConsumption(db *gorm.DB) {
 
 	db.Save(&consumption)
 
-	fmt.Println("logging")
+	log.Info("Logged consumption", consumption)
 }

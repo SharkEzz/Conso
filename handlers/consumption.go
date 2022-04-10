@@ -8,6 +8,8 @@ import (
 	"github.com/SharkEzz/elec/types"
 	"github.com/SharkEzz/elec/utils"
 	"github.com/gofiber/fiber/v2"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
@@ -47,13 +49,14 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 }
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
-
 	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().Format(time.RFC3339)))
 	if err != nil {
+		log.Error("invalid 'from' filter", err)
 		return err
 	}
 	to, err := time.Parse(time.RFC3339, c.Query("to", time.Now().Format(time.RFC3339)))
 	if err != nil {
+		log.Error("invalid 'to' filter", err)
 		return err
 	}
 

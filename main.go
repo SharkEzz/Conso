@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/SharkEzz/elec/database"
@@ -13,6 +14,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/writer"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +27,23 @@ var (
 
 //go:embed front/dist/*
 var content embed.FS
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
+
+	logFile, err := os.OpenFile("logs.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logFile, err = os.Create("logs.log")
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	log.AddHook(&writer.Hook{
+		Writer:    logFile,
+		LogLevels: log.AllLevels,
+	})
+}
 
 func main() {
 	flag.Parse()
@@ -45,6 +65,7 @@ func main() {
 		PathPrefix: "front/dist",
 	}))
 
+	log.Info("Starting")
 	app.Listen(":8080")
 }
 
