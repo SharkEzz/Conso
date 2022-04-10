@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/SharkEzz/elec/database/models"
@@ -14,9 +13,8 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 	var consumptions []models.Consumption
 
 	b.db.Where(
-		"created_at >= ? AND created_at < ?",
+		"created_at >= ?",
 		time.Now().Format("2006-01-02")+" 06:00:00",
-		time.Now().AddDate(0, 0, 1).Format("2006-01-02")+" 06:00:00",
 	).Find(&consumptions)
 
 	total := computeTotal(&consumptions)
@@ -33,46 +31,32 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 }
 
 func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
-	filters := c.Query("filters", "")
 
-	var from time.Time
-	var to time.Time
-
-	if filters == "" {
-		// Default to last month from now if no filters specified
-		from = time.Now().AddDate(0, -1, 0)
-		to = time.Now()
-	} else {
-		var filtersJson map[string]string
-		err := json.Unmarshal([]byte(filters), &filtersJson)
-		if err != nil {
-			return err
-		}
-
-		from, err = time.Parse(time.RFC3339, filtersJson["from"])
-		if err != nil {
-			return err
-		}
-		to, err = time.Parse(time.RFC3339, filtersJson["to"])
-		if err != nil {
-			return err
-		}
+	from, err := time.Parse(time.RFC3339, c.Query("from", time.Now().AddDate(0, -1, 0).Format(time.RFC3339)))
+	if err != nil {
+		return err
+	}
+	to, err := time.Parse(time.RFC3339, c.Query("to", time.Now().Format(time.RFC3339)))
+	if err != nil {
+		return err
 	}
 
 	var consumptions []models.Consumption
 
 	b.db.Where(
-		"created_at >= ? AND created_at <= ?",
+		"created_at BETWEEN ? AND ?",
 		from,
 		to,
-	).Find(&consumptions)
+	).Group("date(created_at)").Find(&consumptions)
 
 	total := computeTotal(&consumptions)
+	perHour := computePerHour(&consumptions)
 
 	responsePayload := types.ConsumptionsResponse{
-		Consumptions: consumptions,
-		TodayDate:    time.Now().Format("2006-01-02") + " 06:00:00",
-		TotalAverage: total,
+		Consumptions:     consumptions,
+		TodayDate:        time.Now().Format("2006-01-02") + " 06:00:00",
+		HourConsumptions: perHour,
+		TotalAverage:     total,
 	}
 
 	return c.JSON(utils.GenerateResponse(200, "", responsePayload))

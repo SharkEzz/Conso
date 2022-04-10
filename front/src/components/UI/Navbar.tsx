@@ -13,7 +13,6 @@ export default function Navbar() {
           <Flex gap={3}>
             <Link to="/">Journée</Link>
             <Link to="/historique">Historique</Link>
-            <Link to="/statistiques">Statistiques</Link>
           </Flex>
           <Box ml="auto">
             <Tempo />

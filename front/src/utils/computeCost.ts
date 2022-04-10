@@ -1,7 +1,7 @@
 import { Pricings } from '../actions/fetchPricing';
 
 export default function computeCost(
-  tempo: string,
+  tempo: string | null,
   hourConsumption: Record<number, number>,
   pricings: Pricings,
 ): number {

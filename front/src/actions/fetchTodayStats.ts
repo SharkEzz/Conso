@@ -12,7 +12,7 @@ export type Consumption = {
   Voltage: number;
 };
 
-export type TodayStatsResponse = {
+export type StatsResponse = {
   Consumptions: Array<Consumption>;
   HourConsumptions: Record<number, number>;
   TotalAverage: number;
@@ -22,7 +22,7 @@ export type TodayStatsResponse = {
 export default async function fetchTodayStats() {
   const res = await axios('/stats/today');
 
-  const data = res.data?.Data as TodayStatsResponse | null;
+  const data = res.data?.Data as StatsResponse | null;
 
   if (!data) {
     throw new Error('invalid response');

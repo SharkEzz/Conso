@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/SharkEzz/elec/constants"
 	"github.com/SharkEzz/elec/database/models"
 	"github.com/SharkEzz/elec/utils"
 	"gorm.io/gorm"
@@ -78,10 +79,25 @@ func LogConsumption(db *gorm.DB) {
 
 	wg.Wait()
 
+	var fullHourPrice float64
+	var peakHourPrice float64
+
+	switch dayColor {
+	case "TEMPO_ROUGE":
+		fullHourPrice = constants.RedFullHourPrice
+		peakHourPrice = constants.RedPeakHourPrice
+	case "TEMPO_BLANC":
+		fullHourPrice = constants.WhiteFullHourPrice
+		peakHourPrice = constants.WhitePeakHourPrice
+	case "TEMPO_BLEU":
+		fullHourPrice = constants.BlueFullHourPrice
+		peakHourPrice = constants.BluePeakHourPrice
+	}
+
 	consumption := models.Consumption{
 		DayColor:       dayColor,
-		FullHourPrice:  0,
-		PeakHoursPrice: 0,
+		FullHourPrice:  fullHourPrice,
+		PeakHoursPrice: peakHourPrice,
 		Temperature:    0,
 		Power:          power,
 		Voltage:        voltage,

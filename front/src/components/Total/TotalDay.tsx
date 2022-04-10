@@ -10,13 +10,11 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { Badge, Box, Flex, Text } from '@chakra-ui/react';
-import { useQuery } from 'react-query';
 import { useContext } from 'react';
 import { Consumption } from '../../actions/fetchTodayStats';
 import Pricing from './Pricing';
-import fetchTempo from '../../actions/fetchTempo';
 import PricingContext from '../../context/princingContext';
-import computeCost from '../../utils/computeConst';
+import computeCost from '../../utils/computeCost';
 
 // TODO: move into component
 ChartJS.register(
@@ -78,7 +76,6 @@ export default function TotalDay({
   date,
 }: TotalDayProps) {
   const pricings = useContext(PricingContext);
-  const { isLoading, data } = useQuery('tempo', fetchTempo);
 
   return (
     <Box borderWidth="thin" borderRadius="lg" boxShadow="md">
@@ -129,14 +126,17 @@ export default function TotalDay({
           Moyenne consommation :{' '}
           <Badge colorScheme="linkedin">{average} W/h</Badge>
         </Text>
-        {!isLoading && data && (
-          <Text>
-            Coût moyen :{' '}
-            <Badge colorScheme="linkedin">
-              {computeCost(data.Today, hourlyConsumptions, pricings)} €
-            </Badge>
-          </Text>
-        )}
+        <Text>
+          Coût moyen :{' '}
+          <Badge colorScheme="linkedin">
+            {computeCost(
+              consumptions?.[0]?.DayColor,
+              hourlyConsumptions,
+              pricings,
+            )}{' '}
+            €
+          </Badge>
+        </Text>
       </Flex>
     </Box>
   );

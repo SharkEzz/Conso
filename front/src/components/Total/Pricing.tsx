@@ -7,7 +7,7 @@ import {
   Badge,
 } from '@chakra-ui/react';
 import { Pricings } from '../../actions/fetchPricing';
-import computeCost from '../../utils/computeConst';
+import computeCost from '../../utils/computeCost';
 
 export default function Pricing({
   hourlyConsumptions,
