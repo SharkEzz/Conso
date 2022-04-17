@@ -178,8 +178,13 @@ func computeTotalDailyCost(yesterdayColor string, todayColor string, todayPerHou
 			continue
 		}
 
-		if key >= 6 && key < 14 {
+		if key >= 6 && key < 22 {
 			cost += (item / 1000) * todayFullHourPrice
+			continue
+		}
+
+		if key >= 22 && key <= 23 {
+			cost += (item / 1000) * todayPeakHourPrice
 			continue
 		}
 
