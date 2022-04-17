@@ -81,9 +81,9 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 	b.db.
 		Preload("ConsumptionLogs").
 		Where(
-			"created_at >= ? AND created_at <= ?",
-			from.Format("2006-01-02")+" 06:00:00",
-			to.AddDate(0, 0, 1).Format("2006-01-02")+" 06:00:00",
+			"created_at >= ? AND created_at < ?",
+			from.Format("2006-01-02")+" 00:00:00",
+			to.AddDate(0, 0, 1).Format("2006-01-02")+" 00:00:00",
 		).Find(&days)
 
 	consumptions := map[string]types.DailyConsumptionsResponse{}
