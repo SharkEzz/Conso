@@ -12,4 +12,5 @@ type DailyConsumptionsResponse struct {
 	Tempo            string
 	FullHourPrice    float64
 	PeakHourPrice    float64
+	TotalCost        float64
 }

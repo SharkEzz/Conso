@@ -57,6 +57,7 @@ func main() {
 
 	registerRoutes(app, db)
 	if !*disableLogger {
+		log.Info("Enabling periodic logger")
 		registerLogger(db)
 	}
 
@@ -77,7 +78,6 @@ func registerRoutes(app *fiber.App, db *gorm.DB) {
 	apiGroup.Use(cors.New())
 
 	apiGroup.Get("/tempo", baseHandler.GetCurrentTempo)
-	apiGroup.Get("/prices", baseHandler.GetPrices)
 	apiGroup.Get("/stats", baseHandler.GetStatsWithFilters)
 	apiGroup.Get("/stats/today", baseHandler.GetTodayStats)
 }

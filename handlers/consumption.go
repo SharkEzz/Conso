@@ -1,40 +1,49 @@
 package handlers
 
 import (
+	"math"
 	"sync"
 	"time"
 
+	"github.com/SharkEzz/elec/constants"
 	"github.com/SharkEzz/elec/database/models"
 	"github.com/SharkEzz/elec/types"
 	"github.com/SharkEzz/elec/utils"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
-	var day models.Day
+	var day *models.Day
 
 	// TODO: check better way to query relationships?
 	b.db.Preload("ConsumptionLogs").Order("created_at DESC").Last(&day)
 
-	// TODO: handle error when no data are logged
+	if day == nil {
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(utils.GenerateResponse(fiber.StatusInternalServerError, "no day found", nil))
+	}
+
 	if day.ConsumptionLogs == nil {
 		day.ConsumptionLogs = []models.ConsumptionLog{}
 	}
 
+	yesterdayColor := findYesterdayColor(day, b.db)
+
 	var total float64
-	var totalPerHour map[int]float64
+	totalPerHour := map[int]float64{}
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
-		total = computeTotal(&day.ConsumptionLogs)
+		total = computeTotalConsumption(yesterdayColor, &day.ConsumptionLogs)
 		wg.Done()
 	}()
 	go func() {
-		totalPerHour = computePerHour(&day.ConsumptionLogs)
+		totalPerHour = computePerHourConsumption(yesterdayColor, &day.ConsumptionLogs)
 		wg.Done()
 	}()
 
@@ -44,10 +53,11 @@ func (b *Handler) GetTodayStats(c *fiber.Ctx) error {
 		Consumptions:     day.ConsumptionLogs,
 		HourConsumptions: totalPerHour,
 		TotalAverage:     total,
-		TodayDate:        day.CreatedAt.Format("2006-01-02") + " 06:00:00",
+		TodayDate:        day.CreatedAt.Format("2006-01-02"),
 		Tempo:            day.Tempo,
 		FullHourPrice:    day.FullHourPrice,
 		PeakHourPrice:    day.PeakHourPrice,
+		TotalCost:        computeTotalDailyCost(yesterdayColor, day.Tempo, totalPerHour),
 	}
 
 	return c.JSON(utils.GenerateResponse(200, "", responsePayload))
@@ -89,12 +99,14 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 		wg := sync.WaitGroup{}
 		wg.Add(2)
 
+		yesterdayColor := findYesterdayColor(&day, b.db)
+
 		go func() {
-			total = computeTotal(&day.ConsumptionLogs)
+			total = computeTotalConsumption(yesterdayColor, &day.ConsumptionLogs)
 			wg.Done()
 		}()
 		go func() {
-			totalPerHour = computePerHour(&day.ConsumptionLogs)
+			totalPerHour = computePerHourConsumption(yesterdayColor, &day.ConsumptionLogs)
 			wg.Done()
 		}()
 
@@ -104,17 +116,18 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 			Consumptions:     day.ConsumptionLogs,
 			HourConsumptions: totalPerHour,
 			TotalAverage:     total,
-			TodayDate:        day.CreatedAt.Format("2006-01-02") + " 06:00:00",
+			TodayDate:        day.CreatedAt.Format("2006-01-02"),
 			Tempo:            day.Tempo,
 			FullHourPrice:    day.FullHourPrice,
 			PeakHourPrice:    day.PeakHourPrice,
+			TotalCost:        computeTotalDailyCost(yesterdayColor, day.Tempo, totalPerHour),
 		}
 	}
 
 	return c.JSON(utils.GenerateResponse(200, "", consumptions))
 }
 
-func computePerHour(consumptions *[]models.ConsumptionLog) map[int]float64 {
+func computePerHourConsumption(yesterdayColor string, consumptions *[]models.ConsumptionLog) map[int]float64 {
 	data := map[int]float64{}
 
 	if len(*consumptions) == 0 {
@@ -136,7 +149,7 @@ func computePerHour(consumptions *[]models.ConsumptionLog) map[int]float64 {
 	return data
 }
 
-func computeTotal(consumptions *[]models.ConsumptionLog) float64 {
+func computeTotalConsumption(yesterdayColor string, consumptions *[]models.ConsumptionLog) float64 {
 	if len(*consumptions) == 0 {
 		return 0.
 	}
@@ -150,4 +163,40 @@ func computeTotal(consumptions *[]models.ConsumptionLog) float64 {
 	total /= float64(len(*consumptions))
 
 	return total
+}
+
+func computeTotalDailyCost(yesterdayColor string, todayColor string, todayPerHourConsumptions map[int]float64) float64 {
+	previousDayPeakHourPrice := utils.GetHourPriceByTempoColor(yesterdayColor, false)
+	todayFullHourPrice := utils.GetHourPriceByTempoColor(todayColor, true)
+	todayPeakHourPrice := utils.GetHourPriceByTempoColor(todayColor, false)
+
+	var cost float64
+
+	for key, item := range todayPerHourConsumptions {
+		if key >= 0 && key < 6 {
+			cost += (item / 1000) * previousDayPeakHourPrice
+			continue
+		}
+
+		if key >= 6 && key < 14 {
+			cost += (item / 1000) * todayFullHourPrice
+			continue
+		}
+
+		cost += (item / 1000) * todayPeakHourPrice
+	}
+
+	return math.Round(cost*100) / 100
+}
+
+func findYesterdayColor(today *models.Day, db *gorm.DB) string {
+	var yesterday *models.Day
+	db.Where("id = ?", today.ID-1).Find(&yesterday)
+
+	if yesterday == nil {
+		log.Warn("previous day not found, setting white tempo")
+		return constants.TEMPO_BLANC
+	}
+
+	return yesterday.Tempo
 }

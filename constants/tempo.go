@@ -1,0 +1,7 @@
+package constants
+
+const (
+	TEMPO_BLEU  = "TEMPO_BLEU"
+	TEMPO_BLANC = "TEMPO_BLANC"
+	TEMPO_ROUGE = "TEMPO_ROUGE"
+)

@@ -1,13 +1,13 @@
 package utils
 
-type apiResponse[T any] struct {
+type apiResponse struct {
 	Code    int
 	Message string
-	Data    T
+	Data    any
 }
 
-func GenerateResponse[T any](code int, message string, data T) apiResponse[T] {
-	return apiResponse[T]{
+func GenerateResponse(code int, message string, data any) apiResponse {
+	return apiResponse{
 		Code:    code,
 		Message: message,
 		Data:    data,

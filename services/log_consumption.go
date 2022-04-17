@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// TODO: dynamic URL
 const url = "http://192.168.0.11/sensor/"
 
 func getVoltage() float64 {
@@ -62,14 +63,10 @@ func getPower() float64 {
 }
 
 func LogConsumption(db *gorm.DB) {
-	voltage := 0.
-	power := 0.
-
-	currentDay := time.Now().Format("2006-01-02") + " 06:00:00"
-	limitDay := time.Now().AddDate(0, 0, 1).Format("2006-01-02") + " 06:00:00"
+	currentDay := time.Now().Format("2006-01-02") + " 00:00:00"
+	limitDay := time.Now().AddDate(0, 0, 1).Format("2006-01-02") + " 00:00:00"
 
 	var count int64
-
 	var day *models.Day
 	db.Where("created_at >= ? AND created_at < ?", currentDay, limitDay).Find(&day).Count(&count)
 
@@ -77,6 +74,7 @@ func LogConsumption(db *gorm.DB) {
 		log.Info("creating new day")
 		dayTempo, err := utils.GetTempo()
 		if err != nil {
+			log.Error("error while getting new day tempo, skipping current logging")
 			return
 		}
 
@@ -106,6 +104,9 @@ func LogConsumption(db *gorm.DB) {
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
+
+	voltage := 0.
+	power := 0.
 
 	go func() {
 		voltage = getVoltage()

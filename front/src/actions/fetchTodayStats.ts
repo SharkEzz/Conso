@@ -20,6 +20,7 @@ export type StatsResponse = {
   Tempo: string;
   FullHourPrice: string;
   PeakHourPrice: string;
+  TotalCost: number;
 };
 
 export default async function fetchTodayStats() {
