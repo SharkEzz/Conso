@@ -1,10 +1,10 @@
-FROM node:lts-alpine3.15 AS front_builder
+FROM node:16-alpine3.15 AS front_builder
 
 WORKDIR /build
 COPY front .
 RUN npm i && npm run build
 
-FROM golang:1.18.0-alpine3.15 AS runner
+FROM golang:1.18-alpine AS runner
 
 WORKDIR /build
 COPY . .
