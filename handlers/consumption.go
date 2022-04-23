@@ -86,9 +86,9 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 			to.AddDate(0, 0, 1).Format("2006-01-02")+" 00:00:00",
 		).Find(&days)
 
-	consumptions := map[string]types.DailyConsumptionsResponse{}
+	consumptions := make([]types.DailyConsumptionsResponse, len(days))
 
-	for _, day := range days {
+	for index, day := range days {
 		var total float64
 		var totalPerHour map[int]float64
 
@@ -112,7 +112,7 @@ func (b *Handler) GetStatsWithFilters(c *fiber.Ctx) error {
 
 		wg.Wait()
 
-		consumptions[day.CreatedAt.Format("2006-01-02")] = types.DailyConsumptionsResponse{
+		consumptions[index] = types.DailyConsumptionsResponse{
 			Consumptions:     day.ConsumptionLogs,
 			HourConsumptions: totalPerHour,
 			TotalAverage:     total,

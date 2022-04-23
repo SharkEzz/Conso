@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ReactDatePicker from 'react-datepicker';
 import { useQuery } from 'react-query';
 import fetchHistoryStats from '../actions/fetchHistoryStats';
-import TotalDay from '../components/TotalDay/TotalDay';
+import TotalDays from '../components/TotalDays/TotalDays';
 
 const currentDate = new Date();
 
@@ -50,9 +50,7 @@ export default function HistoryPage() {
           </Box>
         </Flex>
       </Box>
-      {Object.keys(data).map((day) => (
-        <TotalDay key={day} stats={data[day as any]} />
-      ))}
+      <TotalDays stats={data} />
     </>
   );
 }

@@ -4,7 +4,15 @@ import Tempo from '../Tempo';
 
 export default function Navbar() {
   return (
-    <Box bg="ButtonFace" h="16" boxShadow="md" mb={6} position="sticky" top={0}>
+    <Box
+      bg="ButtonFace"
+      h="16"
+      boxShadow="md"
+      mb={6}
+      position="sticky"
+      top={0}
+      zIndex="sticky"
+    >
       <Container maxW="container.xl" h="100%">
         <Flex alignItems="center" h="100%" gap={6}>
           <Text fontSize="xl" fontWeight="bold">

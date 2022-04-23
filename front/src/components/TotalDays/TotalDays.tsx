@@ -10,7 +10,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { Badge, Box, Flex, Text } from '@chakra-ui/react';
-import { Consumption, StatsResponse } from '../../actions/fetchTodayStats';
+import { StatsResponse } from '../../actions/fetchTodayStats';
 
 // TODO: move into component
 ChartJS.register(
@@ -22,31 +22,41 @@ ChartJS.register(
   Tooltip,
 );
 
-function computeLabels(consumptions: Consumption[]): string[] {
+function computeLabels(stats: StatsResponse[]): string[] {
   const labels: string[] = [];
 
-  consumptions.forEach((consumption) => {
-    labels.push(new Date(consumption.CreatedAt).toLocaleTimeString('fr-FR'));
+  stats.forEach((stat) => {
+    labels.push(new Date(stat.TodayDate).toLocaleDateString('fr-FR'));
   });
 
   return labels;
 }
 
-function computeData(consumptions: Consumption[]) {
-  const powers = consumptions.map((c) => c.Power);
-  const voltages = consumptions.map((c) => c.Voltage);
+function computeData(stats: StatsResponse[]) {
+  const power: Array<number> = [];
+  const voltage: Array<number> = [];
+
+  stats.forEach((stat) => {
+    power.push(stat.TotalAverage);
+    const meanVoltage =
+      stat.Consumptions.map((item) => item.Voltage).reduce(
+        (prev, curr) => Number(prev) + Number(curr),
+        0,
+      ) / stat.Consumptions.length;
+    voltage.push(meanVoltage);
+  });
 
   const data: ChartDataset<'line', number[]>[] = [
     {
       label: 'Puissance',
-      data: powers,
+      data: power,
       yAxisID: 'y',
       borderColor: 'rgb(255, 99, 132)',
       backgroundColor: 'rgba(255, 99, 132, 0.5)',
     },
     {
       label: 'Tension',
-      data: voltages,
+      data: voltage,
       yAxisID: 'y1',
       borderColor: 'rgb(53, 162, 235)',
       backgroundColor: 'rgba(53, 162, 235, 0.5)',
@@ -56,14 +66,29 @@ function computeData(consumptions: Consumption[]) {
   return data;
 }
 
-export default function TotalDay({ stats }: { stats: StatsResponse }) {
+export default function TotalDays({ stats }: { stats: StatsResponse[] }) {
+  if (stats.length === 0) {
+    return <div>No data</div>;
+  }
+
   return (
     <Box borderWidth="thin" borderRadius="lg" boxShadow="md" mb={6}>
       <Box py={3} px={6} borderBottomWidth="thin">
         <Text>
-          {new Date(stats.TodayDate).toLocaleDateString('fr-FR', {
-            dateStyle: 'full',
-          })}
+          <strong>
+            {new Date(stats[0]?.TodayDate).toLocaleDateString('fr-FR', {
+              dateStyle: 'full',
+            })}
+          </strong>
+          {' -> '}
+          <strong>
+            {new Date(stats[stats.length - 1]?.TodayDate).toLocaleDateString(
+              'fr-FR',
+              {
+                dateStyle: 'full',
+              },
+            )}
+          </strong>
         </Text>
       </Box>
       <Box p={6}>
@@ -94,22 +119,40 @@ export default function TotalDay({ stats }: { stats: StatsResponse }) {
               },
             }}
             data={{
-              labels: computeLabels(stats.Consumptions),
-              datasets: computeData(stats.Consumptions),
+              labels: computeLabels(stats),
+              datasets: computeData(stats),
             }}
           />
         </Box>
       </Box>
       <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
         <Text>
-          Moyenne consommation :{' '}
+          Consommation moyenne :{' '}
           <Badge colorScheme="linkedin">
-            {Math.round(stats.TotalAverage * 1000) / 1000} W/h
+            {Math.round(
+              (stats
+                .map((stat) => stat.TotalAverage)
+                .reduce((prev, curr) => prev + curr) /
+                stats.length) *
+                1000,
+            ) / 1000}{' '}
+            W/h
           </Badge>
         </Text>
         <Text>
-          Coût : <Badge colorScheme="linkedin">{stats.TotalCost} €</Badge>
+          Consommation totale :{' '}
+          <Badge colorScheme="linkedin">
+            {Math.round(
+              stats
+                .map((stat) => stat.TotalAverage)
+                .reduce((prev, curr) => prev + curr) * 1000,
+            ) / 1000}{' '}
+            W
+          </Badge>
         </Text>
+        {/* <Text>
+          Coût total : <Badge colorScheme="linkedin">oui €</Badge>
+        </Text> */}
       </Flex>
     </Box>
   );

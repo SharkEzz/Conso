@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	logTimer      = flag.Uint64("logTimer", 60, "The delay between 2 consumption logs in seconds")
+	logTimer      = flag.Uint64("logTimer", 300, "The delay between 2 consumption logs in seconds")
 	migrate       = flag.Bool("migrate", false, "Set to true to enable models migrations")
 	disableLogger = flag.Bool("disableLogger", false, "Set to true to disable the periodic logger")
 )

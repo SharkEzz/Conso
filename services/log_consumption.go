@@ -128,5 +128,5 @@ func LogConsumption(db *gorm.DB) {
 
 	db.Save(&consumption)
 
-	log.Info("Logged consumption", consumption)
+	log.Info("Logged consumption ", time.Now())
 }
