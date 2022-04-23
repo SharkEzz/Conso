@@ -9,7 +9,7 @@ import {
   ChartDataset,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Badge, Box, Flex, Text } from '@chakra-ui/react';
+import { Badge, Box, SimpleGrid, Text } from '@chakra-ui/react';
 import { StatsResponse } from '../../actions/fetchTodayStats';
 
 // TODO: move into component
@@ -79,8 +79,8 @@ export default function TotalDays({ stats }: { stats: StatsResponse[] }) {
             {new Date(stats[0]?.TodayDate).toLocaleDateString('fr-FR', {
               dateStyle: 'full',
             })}
-          </strong>
-          {' -> '}
+          </strong>{' '}
+          &rarr;{' '}
           <strong>
             {new Date(stats[stats.length - 1]?.TodayDate).toLocaleDateString(
               'fr-FR',
@@ -125,7 +125,14 @@ export default function TotalDays({ stats }: { stats: StatsResponse[] }) {
           />
         </Box>
       </Box>
-      <Flex py={3} px={6} borderTopWidth="thin" justifyContent="space-between">
+      <SimpleGrid
+        columns={[1, null, null, 3]}
+        spacing={3}
+        py={3}
+        px={6}
+        borderTopWidth="thin"
+        justifyItems={['left', null, null, 'center']}
+      >
         <Text>
           Consommation moyenne :{' '}
           <Badge colorScheme="linkedin">
@@ -150,10 +157,16 @@ export default function TotalDays({ stats }: { stats: StatsResponse[] }) {
             W
           </Badge>
         </Text>
-        {/* <Text>
-          Coût total : <Badge colorScheme="linkedin">oui €</Badge>
-        </Text> */}
-      </Flex>
+        <Text>
+          Coût total :{' '}
+          <Badge colorScheme="linkedin">
+            {stats
+              .map((stat) => stat.TotalCost)
+              .reduce((prev, curr) => prev + curr)}{' '}
+            €
+          </Badge>
+        </Text>
+      </SimpleGrid>
     </Box>
   );
 }
